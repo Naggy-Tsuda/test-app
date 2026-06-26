@@ -1,4 +1,7 @@
+import { Alert, Button } from "@mui/material";
 import Image from "next/image";
+import CheckIcon from '@mui/icons-material/Check';
+import VerifiedIcon from '@mui/icons-material/Verified';
 
 export default function Home() {
   return (
@@ -13,6 +16,10 @@ export default function Home() {
           priority
         />
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
+          <Button variant="contained" color="error" size="large">Button</Button>
+          <Alert icon={<VerifiedIcon fontSize="inherit" />} severity="warning">
+  Here is a gentle confirmation that your action was successful.
+</Alert>
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
             Hello world 4
           </h1>
