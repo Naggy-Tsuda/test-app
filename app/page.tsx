@@ -1,18 +1,13 @@
-
-
-
 import { Alert, Button, Typography } from "@mui/material";
 import Image from "next/image";
-import CheckIcon from '@mui/icons-material/Check';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import { createClient } from "@/lib/supabase/server";
+import Hello from "./Hello";
 
 export default async function Home() {
   const supabase = await createClient()
   const { data: instraments } = await supabase.from('instruments').select('*')
-  console.log("🚀 ~ Home ~ data:", instraments)
-
-
+  // console.log("🚀 ~ Home ~ data:", instraments)
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
@@ -34,7 +29,12 @@ export default async function Home() {
               key={instrament.id}/*  */
             >{instrament.name}</div>
           ))}</div>
+          <div>          ========================        </div>
 
+          <div>
+            <Hello rows={instraments}></Hello>
+          </div>
+          <div>          ========================        </div>
 
           iuijiujiujuijijiu
           <hr />
