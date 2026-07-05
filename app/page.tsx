@@ -9,8 +9,8 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
   const supabase = await createClient()
-  const { data: installments } = await supabase.from('instruments').select('*')
-  console.log("🚀 ~ Home ~ data:", installments)
+  const { data: instraments } = await supabase.from('instruments').select('*')
+  console.log("🚀 ~ Home ~ data:", instraments)
 
 
 
@@ -29,10 +29,10 @@ export default async function Home() {
           <hr />
           yhhyhyhy
 
-          <div>{installments?.map(installment => (
+          <div>{instraments?.map(instrament => (
             <div
-              key={installment.id}/*  */
-            >{installment.name}</div>
+              key={instrament.id}/*  */
+            >{instrament.name}</div>
           ))}</div>
 
 
