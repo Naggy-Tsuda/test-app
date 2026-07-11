@@ -6,8 +6,8 @@ import Hello from "./Hello";
 
 export default async function Home() {
   const supabase = await createClient()
-  const { data: instraments } = await supabase.from('instruments').select('*')
-  // console.log("🚀 ~ Home ~ data:", instraments)
+  const { data: staffList } = await supabase.from('staff').select('*')
+  console.log("🚀 ~ Home ~ data:", staffList)
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
@@ -24,15 +24,15 @@ export default async function Home() {
           <hr />
           yhhyhyhy
 
-          <div>{instraments?.map(instrament => (
+          <div>{staffList?.map(staff => (
             <div
-              key={instrament.id}/*  */
-            >{instrament.name}</div>
+              key={staff.id}/*  */
+            >{staff.name}</div>
           ))}</div>
           <div>          ========================        </div>
 
           <div>
-            <Hello rows={instraments}></Hello>
+            <Hello rows={staffList}></Hello>
           </div>
           <div>          ========================        </div>
 
