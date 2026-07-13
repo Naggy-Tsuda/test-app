@@ -3,6 +3,7 @@ import Image from "next/image";
 import VerifiedIcon from '@mui/icons-material/Verified';
 import { createClient } from "@/lib/supabase/server";
 import Hello from "./Hello";
+import Link from "next/link";
 
 export default async function Home() {
   const supabase = await createClient()
@@ -23,6 +24,14 @@ export default async function Home() {
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
           <hr />
           {/* yhhyhyhy */}
+
+          <div>
+            <header style={{ display: 'flex', gap: '15px', padding: '10px 0', borderBottom: '1px solid' }}>
+              <Link href="/">Home</Link>
+              <Link href="/admin">Admin</Link>
+            </header>
+          </div>
+
 
           < div > {staffList?.map(staff => (
             <div
