@@ -21,9 +21,17 @@ export default function StaffPage() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
 
+  const [isMounted, setIsMounted] = useState(false); // Add this state
+
   const [editingId, setEditingId] = useState<number | null>(null);
 
+
   useEffect(() => {
+    console.log('email cahnged')
+  }, [email]);
+
+  useEffect(() => {
+    setIsMounted(true); // Triggers once running safely in the browser
     loadStaff();
   }, []);
 
@@ -83,6 +91,33 @@ export default function StaffPage() {
     setEmail(staff.email);
   }
 
+  // --- NEW DELETE FUNCTION ---
+  async function handleDelete(id: number) {
+    if (!window.confirm("Are you sure you want to delete this staff member?")) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from("staff")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    // If deleting the item currently being edited, reset the form
+    if (editingId === id) {
+      setEditingId(null);
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+    }
+
+    loadStaff();
+  }
+
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 80 },
     { field: "first_name", headerName: "First Name", flex: 1 },
@@ -98,7 +133,24 @@ export default function StaffPage() {
         </Button>
       ),
     },
+    {
+      field: "delete",
+      headerName: "",
+      width: 100,
+      renderCell: (params) => (
+        <Button color="error" onClick={() => handleDelete(params.row.id)}>
+          Delete
+        </Button>
+      ),
+    },
   ];
+
+
+  // GUARD - If page not mounded, do nothing
+  // Stop server pre-rendering of the UI elements
+  if (!isMounted) {
+    return null; // Alternatively, return a simple skeleton or loading text
+  }
 
   return (
     <Box sx={{ p: 4 }}>
