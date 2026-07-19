@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { createClient } from "@/lib/supabase/client";
+import Phone from "./_components/ Phone ";
 
 const supabase = createClient();
 
@@ -157,6 +158,7 @@ export default function StaffPage() {
       <Typography variant="h4" sx={{ mb: 3 }}>
         Staff
       </Typography>
+      <Phone />
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Stack spacing={2}>
