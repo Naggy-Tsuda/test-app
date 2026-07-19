@@ -5,6 +5,12 @@ import { createClient } from "@/lib/supabase/server";
 import Hello from "./Hello";
 import Link from "next/link";
 
+
+/**
+ * 
+ * @deprecated 
+ * Homepage moved (staff)/page.tsx
+ */
 export default async function Home() {
   const supabase = await createClient()
   const { data: staffList } = await supabase.from('staff').select('*')
