@@ -13,14 +13,17 @@ type Staff = {
   first_name: string;
   last_name: string;
   email: string;
+  subject: string;
 };
 
 export default function StaffPage() {
   const [rows, setRows] = useState<Staff[]>([]);
+  console.log(rows);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
 
   const [isMounted, setIsMounted] = useState(false); // Add this state
 
@@ -53,6 +56,7 @@ export default function StaffPage() {
         first_name: firstName,
         last_name: lastName,
         email: email,
+        subject: subject,
       });
 
       if (error) {
@@ -66,6 +70,7 @@ export default function StaffPage() {
           first_name: firstName,
           last_name: lastName,
           email: email,
+          subject: subject,
         })
         .eq("id", editingId);
 
@@ -79,6 +84,7 @@ export default function StaffPage() {
     setFirstName("");
     setLastName("");
     setEmail("");
+    setSubject("");
     setEditingId(null);
 
     // Reload the grid
@@ -90,6 +96,7 @@ export default function StaffPage() {
     setFirstName(staff.first_name);
     setLastName(staff.last_name);
     setEmail(staff.email);
+    setSubject(staff.subject);
   }
 
   // --- NEW DELETE FUNCTION ---
@@ -114,6 +121,7 @@ export default function StaffPage() {
       setFirstName("");
       setLastName("");
       setEmail("");
+      setSubject("");
     }
 
     loadStaff();
@@ -124,6 +132,7 @@ export default function StaffPage() {
     { field: "first_name", headerName: "First Name", flex: 1 },
     { field: "last_name", headerName: "Last Name", flex: 1 },
     { field: "email", headerName: "Email", flex: 1.5 },
+    { field: "subject", headerName: "Subject", flex: 1.5 },
     {
       field: "edit",
       headerName: "",
@@ -178,6 +187,12 @@ export default function StaffPage() {
             label="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <TextField
+            label="Subject"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
           />
 
           <Button variant="contained" onClick={saveStaff}>
