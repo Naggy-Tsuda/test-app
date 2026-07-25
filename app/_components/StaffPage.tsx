@@ -1,13 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { createClient } from "@/lib/supabase/client";
-import Phone from "./_components/ Phone ";
-import { LogoutButton } from "./_components/LogoutButton";
-
-const supabase = createClient();
+import { LogoutButton } from "./LogoutButton";
 
 type Staff = {
   id: number;
@@ -18,6 +15,7 @@ type Staff = {
 };
 
 export default function StaffPage() {
+  const supabase = useMemo(() => createClient(), []);
   const [rows, setRows] = useState<Staff[]>([]);
   console.log(rows);
 
@@ -26,16 +24,16 @@ export default function StaffPage() {
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
 
-  const [isMounted, setIsMounted] = useState(false); // Add this state
+  const [isMounted, setIsMounted] = useState(false);
 
   const [editingId, setEditingId] = useState<number | null>(null);
 
   useEffect(() => {
-    console.log('email cahnged')
+    console.log('email changed')
   }, [email]);
 
   useEffect(() => {
-    setIsMounted(true); // Triggers once running safely in the browser
+    setIsMounted(true);
     loadStaff();
   }, []);
 
@@ -51,7 +49,7 @@ export default function StaffPage() {
   }
 
   async function saveStaff() {
-    if (editingId === null) {
+    if (editingId == null) {
       const { error } = await supabase.from("staff").insert({
         first_name: firstName,
         last_name: lastName,
@@ -80,14 +78,12 @@ export default function StaffPage() {
       }
     }
 
-    // Clear the form
     setFirstName("");
     setLastName("");
     setEmail("");
     setSubject("");
     setEditingId(null);
 
-    // Reload the grid
     loadStaff();
   }
 
@@ -99,7 +95,6 @@ export default function StaffPage() {
     setSubject(staff.subject);
   }
 
-  // --- NEW DELETE FUNCTION ---
   async function handleDelete(id: number) {
     if (!window.confirm("Are you sure you want to delete this staff member?")) {
       return;
@@ -115,7 +110,6 @@ export default function StaffPage() {
       return;
     }
 
-    // If deleting the item currently being edited, reset the form
     if (editingId === id) {
       setEditingId(null);
       setFirstName("");
@@ -155,11 +149,8 @@ export default function StaffPage() {
     },
   ];
 
-
-  // GUARD - If page not mounded, do nothing
-  // Stop server pre-rendering of the UI elements
   if (!isMounted) {
-    return null; // Alternatively, return a simple skeleton or loading text
+    return null;
   }
 
   return (
@@ -168,7 +159,6 @@ export default function StaffPage() {
       <Typography variant="h4" sx={{ mb: 3 }}>
         Staff
       </Typography>
-      <Phone />
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Stack spacing={2}>

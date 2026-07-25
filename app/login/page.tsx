@@ -1,3 +1,6 @@
+'use client'
+
+import { Button } from "@mui/material";
 import { login, signup } from "./actions";
 
 export default function LoginPage() {
@@ -7,8 +10,9 @@ export default function LoginPage() {
       <input id="email" name="email" type="email" required />
       <label htmlFor="password">Password:</label>
       <input id="password" name="password" type="password" required />
-      <button formAction={login}>Log in</button>
-      <button formAction={signup}>Sign up</button>
+      <br />
+      <Button formAction={login}>Log in</Button>
+      <Button formAction={signup}>Sign up</Button>
     </form>
   )
 }
