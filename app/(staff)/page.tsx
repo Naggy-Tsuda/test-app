@@ -5,6 +5,7 @@ import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material"
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { createClient } from "@/lib/supabase/client";
 import Phone from "./_components/ Phone ";
+import { LogoutButton } from "./_components/LogoutButton";
 
 const supabase = createClient();
 
@@ -28,7 +29,6 @@ export default function StaffPage() {
   const [isMounted, setIsMounted] = useState(false); // Add this state
 
   const [editingId, setEditingId] = useState<number | null>(null);
-
 
   useEffect(() => {
     console.log('email cahnged')
@@ -164,6 +164,7 @@ export default function StaffPage() {
 
   return (
     <Box sx={{ p: 4 }}>
+      <LogoutButton />
       <Typography variant="h4" sx={{ mb: 3 }}>
         Staff
       </Typography>
