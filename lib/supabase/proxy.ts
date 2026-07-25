@@ -29,8 +29,7 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Must run this before returning
   await supabase.auth.getClaims()
 
-  return supabaseResponse
+  return { supabase, response: supabaseResponse }
 }

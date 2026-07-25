@@ -2,7 +2,21 @@ import { type NextRequest } from 'next/server'
 import { updateSession } from './lib/supabase/proxy'
 
 export async function proxy(request: NextRequest) {
-  return await updateSession(request)
+  const { supabase, response } = await updateSession(request)
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user && request.nextUrl.pathname !== '/login') {
+    return Response.redirect(new URL('/login', request.url))
+  }
+
+  if (user && request.nextUrl.pathname === '/login') {
+    return Response.redirect(new URL('/', request.url))
+  }
+
+  return response
 }
 
 export const config = {
