@@ -18,8 +18,8 @@ type Staff = {
 export default function StaffPage() {
   const supabase = useMemo(() => createClient(), []);
   const [rows, setRows] = useState<Staff[]>([]);
-  console.log(rows);
 
+  const [isSaving, setIsSaving] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -35,6 +35,7 @@ export default function StaffPage() {
   }, [email]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
     loadStaff();
   }, []);
@@ -90,48 +91,60 @@ export default function StaffPage() {
   }
 
   async function saveStaff() {
+    if (isSaving) {
+      return;
+    }
+
     const errors = validateForm();
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) {
       return;
     }
 
-    if (editingId == null) {
-      const { error } = await supabase.from("staff").insert({
-        first_name: firstName,
-        last_name: lastName,
-        email: email,
-        subject: subject,
-      });
+    setIsSaving(true)
 
-      if (error) {
-        alert(error.message);
-        return;
-      }
-    } else {
-      const { error } = await supabase
-        .from("staff")
-        .update({
+    try {
+      if (editingId == null) {
+        const { error } = await supabase.from("staff").insert({
           first_name: firstName,
           last_name: lastName,
           email: email,
           subject: subject,
-        })
-        .eq("id", editingId);
+        });
 
-      if (error) {
-        alert(error.message);
-        return;
+        if (error) {
+          alert(error.message);
+          return;
+        }
+      } else {
+        const { error } = await supabase
+          .from("staff")
+          .update({
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            subject: subject,
+          })
+          .eq("id", editingId);
+
+        if (error) {
+          alert(error.message);
+          return;
+        }
       }
+
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setSubject("");
+      setEditingId(null);
+
+      loadStaff();
+    } catch (_error) {
+      alert("Something went wrong")
+    } finally {
+      setIsSaving(false)
     }
-
-    setFirstName("");
-    setLastName("");
-    setEmail("");
-    setSubject("");
-    setEditingId(null);
-
-    loadStaff();
   }
 
   function editStaff(staff: Staff) {
