@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { DataGrid, GridColDef, } from "@mui/x-data-grid";
 import { createClient } from "@/lib/supabase/client";
@@ -22,6 +22,7 @@ export default function StaffPage() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const [isMounted, setIsMounted] = useState(false);
 
@@ -47,7 +48,52 @@ export default function StaffPage() {
     }
   }
 
+  function validateForm() {
+    const errors: Record<string, string> = {};
+
+    if (!firstName.trim()) {
+      errors.firstName = "First name is required";
+    }
+
+    if (!lastName.trim()) {
+      errors.lastName = "Last name is required";
+    }
+
+    if (!email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+      errors.email = "Enter a valid email adress";
+    }
+
+    if (!subject.trim()) {
+      errors.subject = "Subject is required";
+    }
+
+    return errors;
+  }
+
+  function handleFieldChange(
+    setter: React.Dispatch<React.SetStateAction<string>>,
+    value: string,
+    field: string,
+  ) {
+    setter(value);
+    if (formErrors[field]) {
+      setFormErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  }
+
   async function saveStaff() {
+    const errors = validateForm();
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
     if (editingId == null) {
       const { error } = await supabase.from("staff").insert({
         first_name: firstName,
@@ -88,6 +134,7 @@ export default function StaffPage() {
 
   function editStaff(staff: Staff) {
     setEditingId(staff.id);
+    setFormErrors({});
     setFirstName(staff.first_name);
     setLastName(staff.last_name);
     setEmail(staff.email);
@@ -163,25 +210,33 @@ export default function StaffPage() {
           <TextField
             label="First Name"
             value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            onChange={(e) => handleFieldChange(setFirstName, e.target.value, "firstName")}
+            error={!!formErrors.firstName}
+            helperText={formErrors.firstName}
           />
 
           <TextField
             label="Last Name"
             value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            onChange={(e) => handleFieldChange(setLastName, e.target.value, "lastName")}
+            error={!!formErrors.lastName}
+            helperText={formErrors.lastName}
           />
 
           <TextField
             label="Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => handleFieldChange(setEmail, e.target.value, "email")}
+            error={!!formErrors.email}
+            helperText={formErrors.email}
           />
 
           <TextField
             label="Subject"
             value={subject}
-            onChange={(e) => setSubject(e.target.value)}
+            onChange={(e) => handleFieldChange(setSubject, e.target.value, "subject")}
+            error={!!formErrors.subject}
+            helperText={formErrors.subject}
           />
 
           <Button variant="contained" onClick={saveStaff}>
