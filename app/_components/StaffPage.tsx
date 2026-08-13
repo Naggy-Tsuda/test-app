@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { DataGrid, GridColDef, } from "@mui/x-data-grid";
 import { createClient } from "@/lib/supabase/client";
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 type Staff = {
   id: number;
@@ -16,8 +18,8 @@ type Staff = {
 export default function StaffPage() {
   const supabase = useMemo(() => createClient(), []);
   const [rows, setRows] = useState<Staff[]>([]);
-  console.log(rows);
 
+  const [isSaving, setIsSaving] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -33,6 +35,7 @@ export default function StaffPage() {
   }, [email]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
     loadStaff();
   }, []);
@@ -88,48 +91,60 @@ export default function StaffPage() {
   }
 
   async function saveStaff() {
+    if (isSaving) {
+      return;
+    }
+
     const errors = validateForm();
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) {
       return;
     }
 
-    if (editingId == null) {
-      const { error } = await supabase.from("staff").insert({
-        first_name: firstName,
-        last_name: lastName,
-        email: email,
-        subject: subject,
-      });
+    setIsSaving(true)
 
-      if (error) {
-        alert(error.message);
-        return;
-      }
-    } else {
-      const { error } = await supabase
-        .from("staff")
-        .update({
+    try {
+      if (editingId == null) {
+        const { error } = await supabase.from("staff").insert({
           first_name: firstName,
           last_name: lastName,
           email: email,
           subject: subject,
-        })
-        .eq("id", editingId);
+        });
 
-      if (error) {
-        alert(error.message);
-        return;
+        if (error) {
+          alert(error.message);
+          return;
+        }
+      } else {
+        const { error } = await supabase
+          .from("staff")
+          .update({
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            subject: subject,
+          })
+          .eq("id", editingId);
+
+        if (error) {
+          alert(error.message);
+          return;
+        }
       }
+
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setSubject("");
+      setEditingId(null);
+
+      loadStaff();
+    } catch (_error) {
+      alert("Something went wrong")
+    } finally {
+      setIsSaving(false)
     }
-
-    setFirstName("");
-    setLastName("");
-    setEmail("");
-    setSubject("");
-    setEditingId(null);
-
-    loadStaff();
   }
 
   function editStaff(staff: Staff) {
@@ -168,7 +183,7 @@ export default function StaffPage() {
   }
 
   const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 80 },
+    // { field: "id", headerName: "ID", width: 80 },
     { field: "first_name", headerName: "First Name", flex: 1 },
     { field: "last_name", headerName: "Last Name", flex: 1 },
     { field: "email", headerName: "Email", flex: 1.5 },
@@ -176,9 +191,9 @@ export default function StaffPage() {
     {
       field: "edit",
       headerName: "",
-      width: 100,
+      width: 120,
       renderCell: (params) => (
-        <Button onClick={() => editStaff(params.row)}>
+        <Button onClick={() => editStaff(params.row)} startIcon={<EditIcon />}>
           Edit
         </Button>
       ),
@@ -186,9 +201,9 @@ export default function StaffPage() {
     {
       field: "delete",
       headerName: "",
-      width: 100,
+      width: 120,
       renderCell: (params) => (
-        <Button color="error" onClick={() => handleDelete(params.row.id)}>
+        <Button color="error" onClick={() => handleDelete(params.row.id)} startIcon={<DeleteIcon />}>
           Delete
         </Button>
       ),
