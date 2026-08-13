@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { DataGrid, GridColDef, } from "@mui/x-data-grid";
 import { createClient } from "@/lib/supabase/client";
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 type Staff = {
   id: number;
@@ -168,7 +170,7 @@ export default function StaffPage() {
   }
 
   const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 80 },
+    // { field: "id", headerName: "ID", width: 80 },
     { field: "first_name", headerName: "First Name", flex: 1 },
     { field: "last_name", headerName: "Last Name", flex: 1 },
     { field: "email", headerName: "Email", flex: 1.5 },
@@ -176,9 +178,9 @@ export default function StaffPage() {
     {
       field: "edit",
       headerName: "",
-      width: 100,
+      width: 120,
       renderCell: (params) => (
-        <Button onClick={() => editStaff(params.row)}>
+        <Button onClick={() => editStaff(params.row)} startIcon={<EditIcon />}>
           Edit
         </Button>
       ),
@@ -186,9 +188,9 @@ export default function StaffPage() {
     {
       field: "delete",
       headerName: "",
-      width: 100,
+      width: 120,
       renderCell: (params) => (
-        <Button color="error" onClick={() => handleDelete(params.row.id)}>
+        <Button color="error" onClick={() => handleDelete(params.row.id)} startIcon={<DeleteIcon />}>
           Delete
         </Button>
       ),
