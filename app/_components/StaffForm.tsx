@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
-import { DataGrid, GridColDef, } from "@mui/x-data-grid";
 import { createClient } from "@/lib/supabase/client";
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import { useRouter } from "next/navigation";
 
 type Staff = {
   id: number;
@@ -15,41 +13,26 @@ type Staff = {
   subject: string;
 };
 
-export default function StaffPage() {
+type StaffFormProps = {
+  mode: 'new' | 'edit';
+  editingId?: number;
+  initialStaff?: Staff | null;
+}
+
+export default function StaffForm({
+  mode,
+  editingId,
+  initialStaff,
+}: StaffFormProps) {
   const supabase = useMemo(() => createClient(), []);
-  const [rows, setRows] = useState<Staff[]>([]);
+  const router = useRouter();
 
   const [isSaving, setIsSaving] = useState(false);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [subject, setSubject] = useState("");
+  const [firstName, setFirstName] = useState(initialStaff?.first_name ?? '');
+  const [lastName, setLastName] = useState(initialStaff?.last_name ?? '');
+  const [email, setEmail] = useState(initialStaff?.email ?? '');
+  const [subject, setSubject] = useState(initialStaff?.subject ?? '');
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
-  const [isMounted, setIsMounted] = useState(false);
-
-  const [editingId, setEditingId] = useState<number | null>(null);
-
-  useEffect(() => {
-    console.log('email changed')
-  }, [email]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsMounted(true);
-    loadStaff();
-  }, []);
-
-  async function loadStaff() {
-    const { data, error } = await supabase
-      .from("staff")
-      .select("*")
-      .order("id");
-
-    if (!error && data) {
-      setRows(data);
-    }
-  }
 
   function validateForm() {
     const errors: Record<string, string> = {};
@@ -95,6 +78,7 @@ export default function StaffPage() {
   }
 
   async function saveStaff() {
+    // avoid double-submits
     if (isSaving) {
       return;
     }
@@ -108,7 +92,8 @@ export default function StaffPage() {
     setIsSaving(true)
 
     try {
-      if (editingId == null) {
+      // create new staff
+      if (mode === 'new') {
         const { error } = await supabase.from("staff").insert({
           first_name: firstName,
           last_name: lastName,
@@ -121,6 +106,7 @@ export default function StaffPage() {
           return;
         }
       } else {
+        // editing staff
         const { error } = await supabase
           .from("staff")
           .update({
@@ -137,91 +123,20 @@ export default function StaffPage() {
         }
       }
 
-      setFirstName("");
-      setLastName("");
-      setEmail("");
-      setSubject("");
-      setEditingId(null);
-
-      loadStaff();
-    } catch (_error) {
-      alert("Something went wrong")
+      // return to list page after successful add or update
+      router.push('/staff');
+      router.refresh();
+    } catch {
+      alert('Something went wrong');
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
-
-  function editStaff(staff: Staff) {
-    setEditingId(staff.id);
-    setFormErrors({});
-    setFirstName(staff.first_name);
-    setLastName(staff.last_name);
-    setEmail(staff.email);
-    setSubject(staff.subject);
-  }
-
-  async function handleDelete(id: number) {
-    if (!window.confirm("Are you sure you want to delete this staff member?")) {
-      return;
-    }
-
-    const { error } = await supabase
-      .from("staff")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    if (editingId === id) {
-      setEditingId(null);
-      setFirstName("");
-      setLastName("");
-      setEmail("");
-      setSubject("");
-    }
-
-    loadStaff();
-  }
-
-  const columns: GridColDef[] = [
-    // { field: "id", headerName: "ID", width: 80 },
-    { field: "first_name", headerName: "First Name", flex: 1 },
-    { field: "last_name", headerName: "Last Name", flex: 1 },
-    { field: "email", headerName: "Email", flex: 1.5 },
-    { field: "subject", headerName: "Subject", flex: 1.5 },
-    {
-      field: "edit",
-      headerName: "",
-      width: 120,
-      renderCell: (params) => (
-        <Button onClick={() => editStaff(params.row)} startIcon={<EditIcon />}>
-          Edit
-        </Button>
-      ),
-    },
-    {
-      field: "delete",
-      headerName: "",
-      width: 120,
-      renderCell: (params) => (
-        <Button color="error" onClick={() => handleDelete(params.row.id)} startIcon={<DeleteIcon />}>
-          Delete
-        </Button>
-      ),
-    },
-  ];
-
-  if (!isMounted) {
-    return null;
   }
 
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" sx={{ mb: 3 }}>
-        Staff
+        {mode === 'new' ? "Add Staff" : "Edit Staff"}
       </Typography>
 
       <Paper sx={{ p: 3, mb: 3 }}>
@@ -259,29 +174,16 @@ export default function StaffPage() {
           />
 
           <Button variant="contained" onClick={saveStaff}>
-            {editingId === null ? "Add Staff" : "Update Staff"}
+            {mode === 'new' ? "Add Staff" : "Update Staff"}
+          </Button>
+
+          <Button variant="outlined" onClick={() => router.push('/staff')}>
+            Back to list
           </Button>
         </Stack>
       </Paper>
 
 
-      <Paper sx={{ height: 400 }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          showToolbar
-          slotProps={{
-            toolbar: {
-              showQuickFilter: true,
-            },
-          }}
-        />
-      </Paper>
-
     </Box>
   );
 }
-
-// function useDemoData(arg0: { dataSet: string; rowLength: number; maxColumns: number; }): { data: any; loading: any; } {
-//   throw new Error("Function not implemented.");
-// }
