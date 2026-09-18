@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Box, Button, Paper, Typography } from "@mui/material";
+import { Avatar, Box, Button, Paper, Typography } from "@mui/material";
 import { DataGrid, GridColDef, } from "@mui/x-data-grid";
 import { createClient } from "@/lib/supabase/client";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -14,6 +14,7 @@ type Staff = {
   last_name: string;
   email: string;
   subject: string;
+  avatar_url: string | null;
 };
 
 export default function StaffList() {
@@ -60,6 +61,14 @@ export default function StaffList() {
   }
 
   const columns: GridColDef[] = [
+    {
+      field: "avatar_url",
+      headerName: "Avatar",
+      width: 80,
+      renderCell: (params) => (
+        <Avatar src={params.row.avatar_url ?? undefined} />
+      ),
+    },
     { field: "first_name", headerName: "First Name", flex: 1 },
     { field: "last_name", headerName: "Last Name", flex: 1 },
     { field: "email", headerName: "Email", flex: 1.5 },

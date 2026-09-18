@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Avatar, Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -11,6 +11,7 @@ type Staff = {
   last_name: string;
   email: string;
   subject: string;
+  avatar_url: string | null;
 };
 
 type StaffFormProps = {
@@ -32,6 +33,8 @@ export default function StaffForm({
   const [lastName, setLastName] = useState(initialStaff?.last_name ?? '');
   const [email, setEmail] = useState(initialStaff?.email ?? '');
   const [subject, setSubject] = useState(initialStaff?.subject ?? '');
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState(initialStaff?.avatar_url ?? '');
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   function validateForm() {
@@ -77,6 +80,16 @@ export default function StaffForm({
     }
   }
 
+  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setAvatarFile(file);
+    setAvatarPreview(file.type.startsWith('image/') ? URL.createObjectURL(file) : '');
+  }
+
   async function saveStaff() {
     // avoid double-submits
     if (isSaving) {
@@ -92,6 +105,25 @@ export default function StaffForm({
     setIsSaving(true)
 
     try {
+      let newAvatarURL = initialStaff?.avatar_url ?? null;
+
+      if (avatarFile) {
+        const path = `${Date.now()}-${avatarFile.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("avatars")
+          .upload(path, avatarFile);
+
+        if (uploadError) {
+          alert(uploadError.message);
+          return;
+        }
+
+        newAvatarURL = supabase.storage
+          .from("avatars")
+          .getPublicUrl(path)
+          .data.publicUrl;
+      }
+
       // create new staff
       if (mode === 'new') {
         const { error } = await supabase.from("staff").insert({
@@ -99,6 +131,7 @@ export default function StaffForm({
           last_name: lastName,
           email: email,
           subject: subject,
+          avatar_url: newAvatarURL,
         });
 
         if (error) {
@@ -114,6 +147,7 @@ export default function StaffForm({
             last_name: lastName,
             email: email,
             subject: subject,
+            avatar_url: newAvatarURL,
           })
           .eq("id", editingId);
 
@@ -141,6 +175,19 @@ export default function StaffForm({
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Stack spacing={2}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Avatar src={avatarPreview || undefined} sx={{ width: 64, height: 64 }} />
+
+            <Button component="label" variant="outlined">
+              Choose Avatar
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleAvatarChange}
+              />
+            </Button>
+          </Box>
           <TextField
             label="First Name"
             value={firstName}
