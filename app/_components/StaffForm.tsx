@@ -42,14 +42,14 @@ export default function StaffForm({
 
     if (!firstName.trim()) {
       errors.firstName = "First name is required";
-    } else if (firstName.length > 10) {
-      errors.firstName = "First name must be 10 characters or less";
+    } else if (firstName.length > 20) {
+      errors.firstName = "First name must be 20 characters or less";
     }
 
     if (!lastName.trim()) {
       errors.lastName = "Last name is required";
-    } else if (lastName.length > 10) {
-      errors.lastName = "Last name must be 10 characters or less";
+    } else if (lastName.length > 20) {
+      errors.lastName = "Last name must be 20 characters or less";
     }
 
     if (!email.trim()) {
