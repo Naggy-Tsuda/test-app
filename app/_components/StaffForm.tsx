@@ -90,6 +90,14 @@ export default function StaffForm({
     setAvatarPreview(file.type.startsWith('image/') ? URL.createObjectURL(file) : '');
   }
 
+  function handleSaveError(error: { code?: string; message: string }) {
+    if (error.code === '23505') {
+      setFormErrors({ email: 'This email is already registered' });
+      return;
+    }
+    alert(error.message);
+  }
+
   async function saveStaff() {
     // avoid double-submits
     if (isSaving) {
@@ -135,7 +143,7 @@ export default function StaffForm({
         });
 
         if (error) {
-          alert(error.message);
+          handleSaveError(error);
           return;
         }
       } else {
@@ -152,7 +160,7 @@ export default function StaffForm({
           .eq("id", editingId);
 
         if (error) {
-          alert(error.message);
+          handleSaveError(error);
           return;
         }
       }
