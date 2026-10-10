@@ -53,5 +53,5 @@ export async function signup(
   }
 
   revalidatePath('/', 'layout')
-  redirect('/account')
+  redirect('/staff')
 }
