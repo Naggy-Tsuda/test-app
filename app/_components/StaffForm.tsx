@@ -233,7 +233,7 @@ export default function StaffForm({
           </Button>
 
           <Button variant="outlined" onClick={() => router.push('/staff')}>
-            Back to list
+            Cancel
           </Button>
         </Stack>
       </Paper>

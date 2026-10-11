@@ -46,10 +46,19 @@ export async function signup(
     return `Password must be greater than ${MIN_PASSWORD_LENGTH} characters`
   }
 
-  const { error } = await supabase.auth.signUp(data)
+  const { data: result, error } = await supabase.auth.signUp(data)
 
   if (error) {
     return error.message
+  }
+
+  // prevents multiple accounts with same email
+  if (result.user?.identities?.length === 0) {
+    return 'This email is already registered. Please log in instead.'
+  }
+
+  if (!result.session) {
+    return 'Check you email to confirm your account'
   }
 
   revalidatePath('/', 'layout')
