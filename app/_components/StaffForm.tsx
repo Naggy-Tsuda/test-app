@@ -20,6 +20,21 @@ type StaffFormProps = {
   initialStaff?: Staff | null;
 }
 
+function avatarPathFromUrl(url: string): string | null {
+  const marker = '/object/public/avatars/';
+  const index = url.indexOf(marker);
+
+  if (index === -1) {
+    return null;
+  }
+
+  try {
+    return decodeURIComponent(url.slice(index + marker.length));
+  } catch {
+    return null;
+  }
+}
+
 export default function StaffForm({
   mode,
   editingId,
@@ -35,6 +50,7 @@ export default function StaffForm({
   const [subject, setSubject] = useState(initialStaff?.subject ?? '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState(initialStaff?.avatar_url ?? '');
+  const [shouldDeleteAvatar, setShouldDeleteAvatar] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   function validateForm() {
@@ -88,6 +104,13 @@ export default function StaffForm({
 
     setAvatarFile(file);
     setAvatarPreview(file.type.startsWith('image/') ? URL.createObjectURL(file) : '');
+    setShouldDeleteAvatar(false);
+  }
+
+  function handleRemoveAvatar() {
+    setAvatarFile(null);
+    setAvatarPreview('');
+    setShouldDeleteAvatar(true);
   }
 
   function handleSaveError(error: { code?: string; message: string }) {
@@ -115,7 +138,16 @@ export default function StaffForm({
     try {
       let newAvatarURL = initialStaff?.avatar_url ?? null;
 
-      if (avatarFile) {
+      if (shouldDeleteAvatar) {
+        newAvatarURL = null;
+
+        if (initialStaff?.avatar_url) {
+          const path = avatarPathFromUrl(initialStaff.avatar_url);
+          if (path) {
+            await supabase.storage.from("avatars").remove([path]);
+          }
+        }
+      } else if (avatarFile) {
         const path = `${Date.now()}-${avatarFile.name}`;
         const { error: uploadError } = await supabase.storage
           .from("avatars")
@@ -195,6 +227,12 @@ export default function StaffForm({
                 onChange={handleAvatarChange}
               />
             </Button>
+
+            {avatarPreview && (
+              <Button color="error" onClick={handleRemoveAvatar} variant="outlined">
+                Remove Avatar
+              </Button>
+            )}
           </Box>
           <TextField
             label="First Name"
