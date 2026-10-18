@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server';
 import { isCurrentUserAdmin } from '@/lib/supabase/auth';
 import Stack from '@mui/material/Stack';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default async function Header() {
   const supabase = await createClient()
@@ -23,8 +24,17 @@ export default async function Header() {
     <Box sx={{ width: "100%" }}>
       <AppBar position="static">
         <Toolbar>
-          <Link href={'/staff'} style={{ flexGrow: 1 }}>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Link
+            href={'/staff'}
+            style={{
+              display: 'flex',
+              flexGrow: 1,
+              alignItems: 'center',
+              gap: '12px',
+              textDecoration: 'none'
+            }}>
+            <Image src='/logo.png' alt="Logo" width={32} height={24} />
+            <Typography variant="h6" component="div" sx={{ display: { xs: 'none', sm: 'block' }, flexGrow: 1 }}>
               Test App
             </Typography>
           </Link>
