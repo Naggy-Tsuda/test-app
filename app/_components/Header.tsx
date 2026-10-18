@@ -1,14 +1,13 @@
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { LogoutButton } from './LogoutButton';
 import { createClient } from '@/lib/supabase/server';
 import { isCurrentUserAdmin } from '@/lib/supabase/auth';
-import Stack from '@mui/material/Stack';
 import Link from 'next/link';
 import Image from 'next/image';
+import HeaderNav from './HeaderNav';
 
 export default async function Header() {
   const supabase = await createClient()
@@ -38,16 +37,9 @@ export default async function Header() {
               Test App
             </Typography>
           </Link>
-          <Stack direction="row" sx={{ mr: 2 }}>
-            <Button href="/staff" color="inherit">
-              Staff
-            </Button>
-            {isAdmin && (
-              <Button href="/users" color="inherit">
-                Users
-              </Button>
-            )}
-          </Stack>
+
+          <HeaderNav isAdmin={isAdmin} />
+
           <LogoutButton />
         </Toolbar>
       </AppBar>
